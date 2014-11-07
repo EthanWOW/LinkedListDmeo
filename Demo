@@ -1,0 +1,148 @@
+import java.util.Iterator;
+
+class MyLinkedList<Anytype> implements Iterable<Anytype>{
+	private Node<Anytype> beginer;		//初始节点
+	private Node<Anytype> ender;		//结束节点
+	private int theSize;
+	private int modCount;
+	
+	//节点
+	private static class Node<Anytype>{
+		public Anytype data;
+		public Node<Anytype> prev;		//指向前一个节点的“指针”
+		public Node<Anytype> next;		//指向后一个节点的“指针”
+		public Node(Anytype d,Node<Anytype> p,Node<Anytype> n){
+			data=d;
+			prev=p;
+			next=n;
+		}
+	}
+	public MyLinkedList(){
+		clear();
+	}
+	//清空，也是初始化
+	public void clear(){
+		beginer=new Node<Anytype>(null,null,null);
+		ender=new Node<Anytype>(null,beginer,null);
+		beginer.next=ender;
+		theSize=0;
+		modCount=0;
+	}
+	public int getSize(){
+		return theSize;
+	}
+	
+	public boolean isEmpty(){
+		return getSize()==0;
+	}
+	//得到指定的节点
+	public Node<Anytype> getNode(int idx){
+		Node<Anytype> p;	//检索指针
+		if(idx<0||idx>theSize){
+			throw new IndexOutOfBoundsException();
+		}
+		if(idx<=getSize()/2){
+			p=beginer.next;	//第一个有data的节点
+			for(int i=0;i<idx;i++){
+				p=p.next;
+			}
+		}else{
+			p=ender;		//id=0时
+			for(int i=getSize();i>idx;i--){
+			    p=p.prev;	
+			}
+		}
+		return p;
+	}
+	
+	//覆盖某个节点
+	public void set(int idx,Anytype value){
+		Node<Anytype> p;
+		p=getNode(idx);
+		p.data=value;
+		modCount++;
+	}
+	public Anytype get(int idx){
+		return getNode(idx).data;
+	}
+	
+	//添加
+	public void add(Anytype value){
+		add(getSize(),value);
+	}
+	public void add(int idx,Anytype value){
+		addBefore(getNode(idx), value);
+	}
+	
+	//在节点前添加
+	public void addBefore(Node<Anytype> p,Anytype value){
+		Node<Anytype> newNode=new Node(value,p.prev,p);
+		newNode.prev.next=newNode;
+		p.prev=newNode;
+		theSize++;
+		modCount++;
+	}
+	
+	//删除
+	public void remove(Node<Anytype> p){
+		p.prev.next=p.next;
+		p.next.prev=p.prev;
+		theSize--;
+		modCount++;
+	}
+	
+	//输出
+	public void printItem(int idx){
+		System.out.println(getNode(idx).data);
+	}
+	public void printBefore(int idx){
+		System.out.println(getNode(idx).prev.data);
+	}
+
+    ///////////////	迭代器
+	
+	@Override
+	public Iterator<Anytype> iterator() {		//此方法返回一个新的迭代器
+		// TODO Auto-generated method stub
+		return new LinkedListIterator();
+	}
+	private class LinkedListIterator implements Iterator<Anytype>{
+		private Node<Anytype> currentNode=beginer.next;
+		
+		@Override
+		public boolean hasNext() {
+			// TODO Auto-generated method stub
+			return currentNode!=ender;
+		}
+
+		@Override
+		public Anytype next() {
+			// TODO Auto-generated method stub
+			Anytype temp=currentNode.data;
+			currentNode=currentNode.next;
+			return temp;
+		}
+
+		@Override
+		public void remove() {
+			// TODO Auto-generated method stub
+			MyLinkedList.this.remove(currentNode);
+		}
+	}
+}
+public class Demo {
+	public static void main(String[] args){
+		MyLinkedList<String> list=new MyLinkedList();
+		list.add("aaaaa");
+		list.add("bbbbb");
+		list.add("cccccc");
+		list.add("dddddd");
+		list.add("eeeeee");
+		list.add("ffffff");
+		list.add("gggggg");
+		Iterator<String> it=list.iterator();
+		while(it.hasNext()){
+			System.out.println(it.next());
+		}
+	}
+}
